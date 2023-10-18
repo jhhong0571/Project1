@@ -22,7 +22,9 @@ public class PlayerController : MonoBehaviour
         dodge = 6,
         moveattack = 11,
         movedodge = 12,
-        rundodge = 21
+        rundodge = 21,
+        xDir = 0,
+        yDir = 0,
     }
     // Start is called before the first frame update
     void Start()
@@ -43,8 +45,10 @@ public class PlayerController : MonoBehaviour
         // 바닥 추락 도중에는 방향 전환을 할 수 없기 때문입니다.
         if (SelectPlayer.isGrounded)
         {
+            float hAxis = Input.GetAxisRaw("Horizontal");
+            float vAxis = Input.GetAxisRaw("Vertical");
             // 키보드에 따른 X, Z 축 이동방향을 새로 결정합니다.
-            MoveDir = new Vector3(-Input.GetAxis("Horizontal"), 0, -Input.GetAxis("Vertical"));
+            MoveDir = new Vector3(-hAxis, 0, -vAxis);
             // 오브젝트가 바라보는 앞방향으로 이동방향을 돌려서 조정합니다.
             MoveDir = SelectPlayer.transform.TransformDirection(MoveDir);
             // 속도를 곱해서 적용합니다.
@@ -63,24 +67,24 @@ public class PlayerController : MonoBehaviour
         UpdateState();
     }
 
-    public void FixedUpdate()
-    {
-        MoveCharacter();
-    }
-
-    public void MoveCharacter()
-    {
-        MoveDir.x = Input.GetAxis("Horizontal");
-        MoveDir.z = Input.GetAxis("Vertical");
-    }
-
     private void UpdateState()
     {
+        if(Mathf.Approximately(MoveDir.x, 0) && Mathf.Approximately(MoveDir.z, 0))
+        {
+            animator.SetBool("isMove", false);
+        }
+        else
+        {
+            animator.SetBool("isMove", true);
+        }
+        animator.SetFloat("xDir", MoveDir.x);
+        animator.SetFloat("yDir", MoveDir.z);
+
         bool CheckMove = Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.D);
         bool CheckMove2 = Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.D);
         if (CheckMove)
         {
-            animator.SetInteger(animationState, (int)Stats.run);
+            animator.SetInteger(animationState, (int)Stats.move);
         }
         else if (CheckMove && Input.GetKeyDown(KeyCode.LeftShift))
         {
@@ -130,5 +134,6 @@ public class PlayerController : MonoBehaviour
         {
             animator.SetInteger(animationState, (int)Stats.idle);
         }
+        
     }
 }
