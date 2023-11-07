@@ -50,6 +50,7 @@ public class hp_mp_InterFace : MonoBehaviour
         if (curHp <= 0)
         {
             //* 체력이 0 이하라 죽음
+            Debug.Log("Player Dead");
         }
     }
 
@@ -62,6 +63,7 @@ public class hp_mp_InterFace : MonoBehaviour
         if (curMp <= 0)
         {
             //* 마력이 0 이하라 스킬X
+            Debug.Log("Not enought SP");
         }
     }
 
@@ -76,7 +78,10 @@ public class hp_mp_InterFace : MonoBehaviour
         SetHp(HpBarSlider.maxValue);
         SetMp(MpBarSlider.maxValue);
         CheckHp();
-        CheckMp();   
+        CheckMp();
+
+        
+
     }
 
     void Update()
@@ -85,5 +90,16 @@ public class hp_mp_InterFace : MonoBehaviour
         mp_text.text = (MpBarSlider.value.ToString() + "/" + MpBarSlider.maxValue.ToString());
         CheckHp();
         CheckMp();
+
+        if (curHp <= 0)
+        {
+            //* 체력이 0 이하라 죽음
+            Debug.Log("Player Dead");
+        }
+        if (curMp <= 0)
+        {
+            //* 마력이 0 이하라 스킬X
+            Debug.Log("Not enought SP");
+        }
     }
 }
