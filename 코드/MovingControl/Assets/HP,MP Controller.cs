@@ -17,16 +17,26 @@ public class hp_mp_InterFace : MonoBehaviour
     public float recovery; // 회복
     public float used_Mpportion; // MP 포션 사용
 
-    public void SetHp(float Hp_amount) // Hp설정
+    public void SetHp(float Hp_amount) // 초기 Hp설정
     {
         maxHp = Hp_amount;
         curHp = maxHp;
     }
 
-    public void SetMp(float Mp_amount) // Mp설정
+    public void SetMp(float Mp_amount) // 초기 Mp설정
     {
         maxMp = Mp_amount;
         curMp = maxMp;
+    }
+
+    public void SetMaxHp(float Hp_amount) // 최대 Hp설정
+    {
+        maxHp += Hp_amount;
+    }
+
+    public void SetMaxMp(float Mp_amount) // 최대 Mp설정
+    {
+        maxMp += Mp_amount;
     }
 
     public void CheckHp() //*HP 갱신
@@ -90,7 +100,6 @@ public class hp_mp_InterFace : MonoBehaviour
         mp_text.text = (MpBarSlider.value.ToString() + "/" + MpBarSlider.maxValue.ToString());
         CheckHp();
         CheckMp();
-
         if (curHp <= 0)
         {
             //* 체력이 0 이하라 죽음
@@ -99,7 +108,7 @@ public class hp_mp_InterFace : MonoBehaviour
         if (curMp <= 0)
         {
             //* 마력이 0 이하라 스킬X
-            Debug.Log("Not enought SP");
+            Debug.Log("Not enought MP");
         }
     }
 }
