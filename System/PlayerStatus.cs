@@ -9,18 +9,21 @@ namespace PlayerUI
     {
         public int health = 100;
         public int maxHealth = 100;
+        public float speed = 30; //속도 - 선제 공격 순위 결정용
+        public int actionPoints = 100; // 행동 게이지
+        public float defense = 0.1f; // 방어력 10%
+        public float criticalChance = 0.1f; // 치명타 확률 10%
+        public float criticalDamageMultiplier = 2.0f; // 치명타 피해량
 
-        // BarsFillAnimations 클래스의 인스턴스
-        public BarsFillAnimations barsFillAnimations;
+        public BarsFillAnimations barsFillAnimations; //체력바 애니메이션
 
-        void start()
+        void Start()
         {
             barsFillAnimations = FindObjectOfType<BarsFillAnimations>();
         }
 
         void Update()
         {
-            // 플레이어의 체력과 최대 체력을 BarsFillAnimations 클래스에 전달하여 업데이트
             barsFillAnimations.UpdateHealthAnimation(health, maxHealth);
             UpdateHealthAnimation();
 
@@ -29,18 +32,18 @@ namespace PlayerUI
             {
                 TakeDamage(80);
             }
+            //테스트용 : H누르면 회복
             if (Input.GetKeyDown(KeyCode.H))
             {
-                Heal();
+                Heal(30);
             }
-
-
         }
-        public void Heal()
+
+        public void Heal(int heal)
         {
             //회복되는 값 알아서
             //예시
-            int Healhealth = 30;
+            int Healhealth = heal;
             health += Healhealth;
         }
 
@@ -48,7 +51,7 @@ namespace PlayerUI
         public void TakeDamage(int damage)
         {
             // 방어력을 고려하여 피해 계산
-            int finalDamage = Mathf.Max(damage - 0, 0);
+            int finalDamage = Mathf.Max(damage - Mathf.FloorToInt(defense * maxHealth), 0);
 
             health -= finalDamage;
 
@@ -62,11 +65,10 @@ namespace PlayerUI
         {
             barsFillAnimations.UpdateHealthAnimation(health, maxHealth);
         }
-        // 사망 처리 메서드
+
         private void Die()
         {
-            // 사망 처리 로직 추가
-            Debug.Log("Player has died.");
+            Debug.Log("죽음.");
         }
     }
 }
