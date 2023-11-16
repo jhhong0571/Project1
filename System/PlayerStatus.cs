@@ -1,74 +1,84 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
-namespace PlayerUI
+public class PS : MonoBehaviour
 {
-    public class PlayerStatus : MonoBehaviour
+    public static PS instance;
+
+    public float CriticalChance = 0.2f;
+    public float CriticalDamage = 2f;
+    public int damage = 20;
+
+    public int health = 100;
+    public int maxHealth = 100;
+
+    public int speed = 30; //ì†ë„ - ì„ ì œ ê³µê²© ìˆœìœ„ ê²°ì •ìš©
+    public int actionPoints = 0; // ì´ˆê¸°ê°’ì„ 0ìœ¼ë¡œ ì„¤ì •
+    public int APgen = 10; // í„´ë§ˆë‹¤ íšŒë³µë˜ëŠ” í–‰ë™ê²Œì´ì§€ ê°’
+
+    public float defense = 0.1f; // ë°©ì–´ë ¥ 10%
+
+    public BarsFillAnimations barsFillAnimations;
+
+    public void Awake()
     {
-        public int health = 100;
-        public int maxHealth = 100;
-        public float speed = 30; //¼Óµµ - ¼±Á¦ °ø°İ ¼øÀ§ °áÁ¤¿ë
-        public int actionPoints = 100; // Çàµ¿ °ÔÀÌÁö
-        public float defense = 0.1f; // ¹æ¾î·Â 10%
-        public float criticalChance = 0.1f; // Ä¡¸íÅ¸ È®·ü 10%
-        public float criticalDamageMultiplier = 2.0f; // Ä¡¸íÅ¸ ÇÇÇØ·®
 
-        public BarsFillAnimations barsFillAnimations; //Ã¼·Â¹Ù ¾Ö´Ï¸ŞÀÌ¼Ç
+    }
 
-        void Start()
+    public bool TakeDamage(int damage)
+    {
+        // ì¹˜ëª…íƒ€ ì—¬ë¶€ ê²°ì •
+        bool isCritical = Random.value < CriticalChance;
+        if(isCritical)
         {
-            barsFillAnimations = FindObjectOfType<BarsFillAnimations>();
+            Debug.Log("í”Œë ˆì´ì–´ ì¹˜ëª…íƒ€!");
         }
 
-        void Update()
-        {
-            barsFillAnimations.UpdateHealthAnimation(health, maxHealth);
-            UpdateHealthAnimation();
+        // ê¸°ë³¸ ë°ë¯¸ì§€ ë˜ëŠ” ì¹˜ëª…íƒ€ ë°ë¯¸ì§€ ì ìš©
+        int calculatedDamage = isCritical ? Mathf.FloorToInt(damage * CriticalDamage) : damage;
 
-            // Å×½ºÆ®¿ë: G Å°¸¦ ´©¸¦ ¶§ Ã¼·Â °¨¼Ò
-            if (Input.GetKeyDown(KeyCode.G))
-            {
-                TakeDamage(80);
-            }
-            //Å×½ºÆ®¿ë : H´©¸£¸é È¸º¹
-            if (Input.GetKeyDown(KeyCode.H))
-            {
-                Heal(30);
-            }
+        int finalDamage = Mathf.Max(calculatedDamage - Mathf.FloorToInt(defense * maxHealth), 0);
+        health -= finalDamage;
+
+        if (health <= 0)
+        {
+            return true;
         }
-
-        public void Heal(int heal)
+        else
         {
-            //È¸º¹µÇ´Â °ª ¾Ë¾Æ¼­
-            //¿¹½Ã
-            int Healhealth = heal;
-            health += Healhealth;
-        }
-
-        // ÇÃ·¹ÀÌ¾î°¡ ÇÇÇØ¸¦ ¹Ş´Â ¸Ş¼­µå
-        public void TakeDamage(int damage)
-        {
-            // ¹æ¾î·ÂÀ» °í·ÁÇÏ¿© ÇÇÇØ °è»ê
-            int finalDamage = Mathf.Max(damage - Mathf.FloorToInt(defense * maxHealth), 0);
-
-            health -= finalDamage;
-
-            if (health <= 0)
-            {
-                Die();
-            }
-        }
-
-        private void UpdateHealthAnimation()
-        {
-            barsFillAnimations.UpdateHealthAnimation(health, maxHealth);
-        }
-
-        private void Die()
-        {
-            Debug.Log("Á×À½.");
+            return false;
         }
     }
+
+    public void Heal()
+    {
+        int Heal = (int)(maxHealth * 0.2f);
+        health += Heal;
+        Debug.Log("íšŒë³µí•˜ì˜€ë‹¤!");
+    }
+
+    public int GetSpeed()
+    {
+        return speed;
+    }
+    // Start is called before the first frame update
+    void Start()
+    {
+        barsFillAnimations = FindObjectOfType<BarsFillAnimations>();
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        barsFillAnimations.UpdateHealthAnimation(health, maxHealth);
+        UpdateHealthAnimation();
+    }
+
+    private void UpdateHealthAnimation()
+    {
+        barsFillAnimations.UpdateHealthAnimation(health, maxHealth);
+    }
+
 }
+
