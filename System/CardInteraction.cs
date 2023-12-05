@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 using TMPro;
+using UnityEngine.SceneManagement;
 
 public class CardInteraction : MonoBehaviour
 {
@@ -9,30 +10,31 @@ public class CardInteraction : MonoBehaviour
     public TextMeshProUGUI UItext;
     public GameObject End;
     public Sprite[] cardSprites;
-    public GameObject[] cardSlots; 
-    public float slideSpeed = 2.0f; 
+    public GameObject[] cardSlots;
+    public float slideSpeed = 2.0f;
     public Sprite card;
     int count = 3;
 
     public GameManager gameManager;
 
-    private bool isScreenUp = true; 
+    private bool isScreenUp = true;
     private bool isCardShowing = false;
 
-    /*
-    //PS 코드에 변수
-    float CC = PS.instance.InitialCriticalChance;
-    float CD = PS.instance.InitialCriticalDamage;
-    int Damage = PS.instance.InitialDamage;
-    int maxHealth = PS.instance.maxHealth;
-    float Defense = PS.instance.InitialDefense;
-    */
 
     private void Start()
     {
-        gameManager.LoadPlayerData();
-        HideCardSlots();
-        
+        gameManager = FindObjectOfType<GameManager>();
+
+        if (gameManager != null)
+        {
+            gameManager.LoadPlayerData();
+            HideCardSlots();
+        }
+        else
+        {
+            Debug.LogError("GameManager not found!");
+        }
+
     }
 
     private void Update()
@@ -112,18 +114,31 @@ public class CardInteraction : MonoBehaviour
     {
         Debug.Log("버튼 1 클릭하여 index값: " + cardIndex);
         ApplyCardEffect(cardIndex);
+        FightManager fightManager = FindObjectOfType<FightManager>();
+        SceneManager.LoadScene(fightManager.sceneName);
+        Debug.Log("워프!adfasdf");
+        fightManager.onBattle = 1;
     }
 
     public void OnButtonClick2(int cardIndex)
     {
         Debug.Log("버튼 2 클릭하여 index값: " + cardIndex);
         ApplyCardEffect(cardIndex);
+        FightManager fightManager = FindObjectOfType<FightManager>();
+        SceneManager.LoadScene(fightManager.sceneName);
+        Debug.Log("워프!adfasdf");
+        fightManager.onBattle = 1;
     }
 
     public void OnButtonClick3(int cardIndex)
     {
         Debug.Log("버튼 3 클릭하여 index값: " + cardIndex);
         ApplyCardEffect(cardIndex);
+        FightManager fightManager = FindObjectOfType<FightManager>();
+        SceneManager.LoadScene(fightManager.sceneName);
+        Debug.Log("워프!adfasdf");
+        fightManager.onBattle = 1;
+
     }
 
 
@@ -138,7 +153,7 @@ public class CardInteraction : MonoBehaviour
             }
         }
 
-       
+
         float targetY = isScreenUp ? -Screen.height : 0;
         StartCoroutine(SlideScreen(targetY));
         isScreenUp = !isScreenUp;
@@ -228,8 +243,10 @@ public class CardInteraction : MonoBehaviour
 
     private void Card0()
     {
+        GameManager gameManager = FindObjectOfType<GameManager>();
+        Debug.Log("ㄸㅇ");
         gameManager.initialDamage += 5;
-        gameManager.initialDefense += 5;
+        gameManager.initialDefense += 0.05f;
         gameManager.initialCriticalDamage -= 0.05f;
         gameManager.initialCriticalChance += 0.05f;
         gameManager.maxHealth += 10;
@@ -238,8 +255,10 @@ public class CardInteraction : MonoBehaviour
 
     private void Card1()
     {
+        GameManager gameManager = FindObjectOfType<GameManager>();
+        Debug.Log("ㄸㅇ");
         gameManager.initialDamage += 8;
-        gameManager.initialDefense -= 10;
+        gameManager.initialDefense -= 0.1f;
         gameManager.initialCriticalDamage += 0.15f;
         gameManager.initialCriticalChance += 0.05f;
         gameManager.maxHealth += 20;
@@ -248,8 +267,10 @@ public class CardInteraction : MonoBehaviour
 
     private void Card2()
     {
+        GameManager gameManager = FindObjectOfType<GameManager>();
+        Debug.Log("ㄸㅇ");
         gameManager.initialDamage += 10;
-        gameManager.initialDefense -= 5;
+        gameManager.initialDefense -= 0.05f;
         gameManager.initialCriticalDamage += 0.2f;
         gameManager.initialCriticalChance += 0.2f;
         gameManager.maxHealth -= 20;
@@ -259,8 +280,10 @@ public class CardInteraction : MonoBehaviour
 
     private void Card3()
     {
+        GameManager gameManager = FindObjectOfType<GameManager>();
+        Debug.Log("ㄸㅇ");
         gameManager.initialDamage -= 7;
-        gameManager.initialDefense += 5;
+        gameManager.initialDefense += 0.05f;
         gameManager.initialCriticalDamage -= 0.1f;
         gameManager.maxHealth += 10;
         gameManager.SavePlayerData();
@@ -269,21 +292,27 @@ public class CardInteraction : MonoBehaviour
 
     private void Card4()
     {
+        GameManager gameManager = FindObjectOfType<GameManager>();
+        Debug.Log("ㄸㅇ");
         gameManager.initialDamage += 2;
-        gameManager.initialDefense += 2;
+        gameManager.initialDefense += 0.02f;
         gameManager.SavePlayerData();
     }
 
     private void Card5()
     {
+        GameManager gameManager = FindObjectOfType<GameManager>();
+        Debug.Log("ㄸㅇ");
         gameManager.initialDamage += 10;
-        gameManager.initialDefense -= 5;
+        gameManager.initialDefense -= 0.05f;
         gameManager.initialCriticalDamage += 0.1f;
         gameManager.SavePlayerData();
     }
     private void Card6()
     {
-        gameManager.initialDefense -= 3;
+        GameManager gameManager = FindObjectOfType<GameManager>();
+        Debug.Log("ㄸㅇ");
+        gameManager.initialDefense -= 0.03f;
         gameManager.initialCriticalDamage += 0.05f;
         gameManager.initialCriticalChance += 0.08f;
         gameManager.maxHealth -= 2;
@@ -291,24 +320,32 @@ public class CardInteraction : MonoBehaviour
     }
     private void Card7()
     {
-        gameManager.initialDefense += 3;
+        GameManager gameManager = FindObjectOfType<GameManager>();
+        Debug.Log("ㄸㅇ");
+        gameManager.initialDefense += 0.03f;
         gameManager.maxHealth += 2;
         gameManager.SavePlayerData();
     }
     private void Card8()
     {
-        gameManager.initialDefense += 2;
+        GameManager gameManager = FindObjectOfType<GameManager>();
+        Debug.Log("ㄸㅇ");
+        gameManager.initialDefense += 0.02f;
         gameManager.maxHealth += 2;
         gameManager.SavePlayerData();
     }
     private void Card9()
     {
-        gameManager.initialDefense -= 2;
+        GameManager gameManager = FindObjectOfType<GameManager>();
+        Debug.Log("ㄸㅇ");
+        gameManager.initialDefense -= 0.02f;
         gameManager.maxHealth += 5;
         gameManager.SavePlayerData();
     }
     private void Card10()
     {
+        GameManager gameManager = FindObjectOfType<GameManager>();
+        Debug.Log("ㄸㅇ");
         gameManager.initialDamage -= 2;
         gameManager.initialCriticalDamage += 0.05f;
         gameManager.initialCriticalChance += 0.1f;
@@ -316,11 +353,15 @@ public class CardInteraction : MonoBehaviour
     }
     private void Card11()
     {
+        GameManager gameManager = FindObjectOfType<GameManager>();
+        Debug.Log("ㄸㅇ");
         gameManager.initialDamage += 4;
         gameManager.SavePlayerData();
     }
     private void Card12()
     {
+        GameManager gameManager = FindObjectOfType<GameManager>();
+        Debug.Log("ㄸㅇ");
         gameManager.initialDamage += 10;
         gameManager.initialCriticalDamage += 0.2f;
         gameManager.maxHealth -= 15;
@@ -328,6 +369,8 @@ public class CardInteraction : MonoBehaviour
     }
     private void Card13()
     {
+        GameManager gameManager = FindObjectOfType<GameManager>();
+        Debug.Log("ㄸㅇ");
         gameManager.initialCriticalChance += 0.12f;
         gameManager.maxHealth -= 5;
         gameManager.SavePlayerData();
@@ -335,5 +378,4 @@ public class CardInteraction : MonoBehaviour
     }
 
 }
-
 
