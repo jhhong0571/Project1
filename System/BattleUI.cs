@@ -14,12 +14,12 @@ public class BattleUI : MonoBehaviour
     //Enemy
     public GameObject EnemyAttack;
     public GameObject Enemyhit;
-    //¿Ã∆Â∆Æ
+    //Ïù¥ÌéôÌä∏
     public GameObject Blood;
     public GameObject PBlood;
     public GameObject Bullet;
 
-    //∞Ê∞Ì
+    //Í≤ΩÍ≥†
     public GameObject Waring;
 
     // Start is called before the first frame update
