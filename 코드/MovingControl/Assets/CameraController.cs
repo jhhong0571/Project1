@@ -13,6 +13,9 @@ public class CameraController : MonoBehaviour
     private float wheelspeed = 10.0f;
     private Vector3 Player_Height;
     private Vector3 Player_Side;
+
+    public FixedTouchField touchField;
+
     void Start()
     {
         Player_Height = new Vector3(0, 1.5f, 0f);
@@ -22,9 +25,9 @@ public class CameraController : MonoBehaviour
     // Update is called once per frame 
     void Update()
     {
-            xmove += Input.GetAxis("Mouse X");
+            xmove += touchField.TouchDist.x;
             // 마우스의 좌우 이동량을 xmove 에 누적합니다. 
-            ymove -= Input.GetAxis("Mouse Y");
+            ymove -= touchField.TouchDist.y;
             // 마우스의 상하 이동량을 ymove 에 누적합니다. 
         transform.rotation = Quaternion.Euler(ymove, xmove, 0); // 이동량에 따라 카메라의 바라보는 방향을 조정합니다. 
         if (toggleView == 3)
