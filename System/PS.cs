@@ -6,30 +6,41 @@ public class PS : MonoBehaviour
 {
     public static PS instance;
 
-    public float InitialCriticalChance = 0.2f;
-    public float InitialCriticalDamage = 1.5f;
-   
+
+    public int maxHealth;
+    public int health;
+    public float InitialDefense;
+    public int InitialDamage;
+    public float InitialCriticalDamage;
+    public float InitialCriticalChance;
+    //public float InitialCriticalChance = 0.2f;
+    //public float InitialCriticalDamage = 1.5f;
+
 
     public float CriticalChance { get; private set; }
     public float CriticalDamage { get; private set; }
 
-    public int InitialDamage = 40;
+   // public int InitialDamage = 40;
     public int damage { get; private set; }
 
 
     
-    public int maxHealth = 100;
-    public int health = 100;
+    //public int maxHealth = 100;
+    //public int health = 100;
 
-    public int speed = 30; //¼Óµµ - ¼±Á¦ °ø°İ ¼øÀ§ °áÁ¤¿ë
+    public int speed = 30; //ì†ë„ - ì„ ì œ ê³µê²© ìˆœìœ„ ê²°ì •ìš©
 
-    public float InitialDefense = 0.1f;
+   // public float InitialDefense = 0.1f;
     public float defense { get; private set; }
 
     public BarsFillAnimations barsFillAnimations;
 
+
+
     public void Awake()
-    {  //°ª ÃÊ±âÈ­
+    {  //ê°’ ì´ˆê¸°í™”
+        instance = this;
+
         CriticalChance = InitialCriticalChance;
         CriticalDamage = InitialCriticalDamage;
         damage = InitialDamage;
@@ -37,9 +48,28 @@ public class PS : MonoBehaviour
 
     }
 
+    void Start()
+    {
+        barsFillAnimations = FindObjectOfType<BarsFillAnimations>();
+        // GameManager í´ë˜ìŠ¤ì˜ ì¸ìŠ¤í„´ìŠ¤ ì°¸ì¡°
+        GameManager gameManager = FindObjectOfType<GameManager>();
+
+        gameManager.LoadPlayerData();
+
+        if (gameManager != null)
+        {
+            maxHealth = gameManager.maxHealth;
+            health = gameManager.health;
+            InitialDefense = gameManager.initialDefense;
+            InitialDamage = gameManager.initialDamage;
+            InitialCriticalChance = gameManager.initialCriticalChance;
+            InitialCriticalDamage = gameManager.initialCriticalDamage;
+        }
+    }
+
     public bool TakeDamage(int damage)
     {
-        // ¹æ¾î·ÂÀ» °í·ÁÇÑ ÃÖÁ¾ µ¥¹ÌÁö °è»ê
+        // ë°©ì–´ë ¥ì„ ê³ ë ¤í•œ ìµœì¢… ë°ë¯¸ì§€ ê³„ì‚°
         int finalDamage = Mathf.Max(damage - Armour(), 0);
         health -= finalDamage;
 
@@ -55,9 +85,14 @@ public class PS : MonoBehaviour
 
     public void Heal()
     {
+
         int Heal = (int)(maxHealth * 0.2f);
         health += Heal;
-        Debug.Log("È¸º¹ÇÏ¿´´Ù!");
+        Debug.Log("íšŒë³µí•˜ì˜€ë‹¤!");
+        if (maxHealth < health)
+        {
+            health = maxHealth;
+        }
     }
 
 
@@ -76,14 +111,14 @@ public class PS : MonoBehaviour
         float pistolMultiplier = 0.75f;
         int baseDamage = Mathf.FloorToInt(damage * pistolMultiplier);
 
-        // Ä¡¸íÅ¸ È®·üÀ» 30%
+        // ì¹˜ëª…íƒ€ í™•ë¥ ì„ 30%
         float increaseAmount = 0.3f;
         IncreaseCriticalChance(increaseAmount);
 
-        // Ä¡¸íÅ¸ ¿©ºÎ È®ÀÎ
+        // ì¹˜ëª…íƒ€ ì—¬ë¶€ í™•ì¸
         if (Random.value < CriticalChance)
         {
-            // Ä¡¸íÅ¸ µ¥¹ÌÁö °è»ê ¹× ¹İÈ¯
+            // ì¹˜ëª…íƒ€ ë°ë¯¸ì§€ ê³„ì‚° ë° ë°˜í™˜
             return CalculateCriticalDamage(baseDamage);
         }
 
@@ -98,10 +133,10 @@ public class PS : MonoBehaviour
 
         float increaseAmount = 0.15f;
         IncreaseCriticalChance(increaseAmount);
-        // Ä¡¸íÅ¸ ¿©ºÎ È®ÀÎ
+        // ì¹˜ëª…íƒ€ ì—¬ë¶€ í™•ì¸
         if (Random.value < CriticalChance)
         {
-            // Ä¡¸íÅ¸ µ¥¹ÌÁö °è»ê ¹× ¹İÈ¯
+            // ì¹˜ëª…íƒ€ ë°ë¯¸ì§€ ê³„ì‚° ë° ë°˜í™˜
             return CalculateCriticalDamage(baseDamage);
         }
 
@@ -116,10 +151,10 @@ public class PS : MonoBehaviour
         float decreaseAmount = 0.05f;
         DecreaseCriticalChance(decreaseAmount);
 
-        // Ä¡¸íÅ¸ ¿©ºÎ È®ÀÎ
+        // ì¹˜ëª…íƒ€ ì—¬ë¶€ í™•ì¸
         if (Random.value < CriticalChance)
         {
-            // Ä¡¸íÅ¸ µ¥¹ÌÁö °è»ê ¹× ¹İÈ¯
+            // ì¹˜ëª…íƒ€ ë°ë¯¸ì§€ ê³„ì‚° ë° ë°˜í™˜
             return CalculateCriticalDamage(baseDamage);
         }
 
@@ -132,7 +167,7 @@ public class PS : MonoBehaviour
         float daggerMultiplier = 0.6f;
         int baseDamage = Mathf.FloorToInt(damage * daggerMultiplier);
 
-        // Ç×»ó Ä¡¸íÅ¸ µ¥¹ÌÁö °è»ê ¹× ¹İÈ¯
+        // í•­ìƒ ì¹˜ëª…íƒ€ ë°ë¯¸ì§€ ê³„ì‚° ë° ë°˜í™˜
         return CalculateCriticalDamage(baseDamage);
     }
 
@@ -141,14 +176,14 @@ public class PS : MonoBehaviour
         float axeMultiplier = 2.5f;
         int baseDamage = Mathf.FloorToInt(damage * axeMultiplier);
 
-        // Ä¡¸íÅ¸ È®·üÀ» 10% °¨¼Ò
+        // ì¹˜ëª…íƒ€ í™•ë¥ ì„ 10% ê°ì†Œ
         float decreaseAmount = 0.1f;
         DecreaseCriticalChance(decreaseAmount);
 
-        // Ä¡¸íÅ¸ ¿©ºÎ È®ÀÎ
+        // ì¹˜ëª…íƒ€ ì—¬ë¶€ í™•ì¸
         if (Random.value < CriticalChance)
         {
-            // Ä¡¸íÅ¸ µ¥¹ÌÁö °è»ê ¹× ¹İÈ¯
+            // ì¹˜ëª…íƒ€ ë°ë¯¸ì§€ ê³„ì‚° ë° ë°˜í™˜
             return CalculateCriticalDamage(baseDamage);
         }
 
@@ -160,27 +195,27 @@ public class PS : MonoBehaviour
         float swordMultiplier = 1.3f;
         int baseDamage = Mathf.FloorToInt(damage * swordMultiplier);
 
-        //Ä¡¸íÅ¸ È®·üÀ» 15%
+        //ì¹˜ëª…íƒ€ í™•ë¥ ì„ 15%
         float increaseAmount = 0.15f;
         IncreaseCriticalChance(increaseAmount);
 
-        // Ä¡¸íÅ¸ ¿©ºÎ È®ÀÎ
+        // ì¹˜ëª…íƒ€ ì—¬ë¶€ í™•ì¸
         if (Random.value < CriticalChance)
         {
-            // Ä¡¸íÅ¸ µ¥¹ÌÁö °è»ê ¹× ¹İÈ¯
+            // ì¹˜ëª…íƒ€ ë°ë¯¸ì§€ ê³„ì‚° ë° ë°˜í™˜
             return CalculateCriticalDamage(baseDamage);
         }
 
         return baseDamage;
     }
 
-    //Ä¡¸íÅ¸ È®·ü °¨¼Ò
+    //ì¹˜ëª…íƒ€ í™•ë¥  ê°ì†Œ
     public void DecreaseCriticalChance(float decreaseAmount)
     {
         CriticalChance = Mathf.Max(0f, CriticalChance - decreaseAmount);
     }
 
-    //Ä¡¸íÅ¸ È®·ü Áõ°¡
+    //ì¹˜ëª…íƒ€ í™•ë¥  ì¦ê°€
     public void IncreaseCriticalChance(float increaseAmount)
     {
         CriticalChance = Mathf.Min(1f, CriticalChance + increaseAmount);
@@ -196,14 +231,17 @@ public class PS : MonoBehaviour
         return speed;
     }
     // Start is called before the first frame update
-    void Start()
-    {
-        barsFillAnimations = FindObjectOfType<BarsFillAnimations>();
-    }
+
 
     // Update is called once per frame
     void Update()
     {
+        if(maxHealth < health)
+        {
+            health = maxHealth;
+        }
+
+
         barsFillAnimations.UpdateHealthAnimation(health, maxHealth);
         UpdateHealthAnimation();
     }
