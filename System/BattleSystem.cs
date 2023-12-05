@@ -3,18 +3,18 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.SceneManagement;
 
 public enum BattleState { START, PLAYERTURN, ENEMYTURN, ENEMYTURN2, ENEMYTURN3, WON, LOST }
 public class BattleSystem : MonoBehaviour
 {
-
+    public string scene;
     public TextMeshProUGUI APText;
     public TextMeshProUGUI APText2;
     public TextMeshProUGUI HText;
     public TextMeshProUGUI UIText;
     public TextMeshProUGUI UIText2;
     public TextMeshProUGUI UIText3;
-    public TextMeshProUGUI UIText4;
 
     public int actionPoints = 20; // 초기값을 10으로 설정
     public int AP = 2; //ActionPoints 소모값 용 변수
@@ -34,6 +34,8 @@ public class BattleSystem : MonoBehaviour
 
     public Transform playerBattleStation;
     public Transform enemyBattleStation;
+    //소리
+    private SoundManager soundManager;
 
     CameraShake cam;
     BattleUI BU;
@@ -45,6 +47,11 @@ public class BattleSystem : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        soundManager = FindObjectOfType<SoundManager>();
+
+        GameManager gameManager = FindObjectOfType<GameManager>();
+        gameManager.LoadPlayerData();
+
         state = BattleState.START;
         BC = turnUI.GetComponent<ButtonController>();
         BU = battleUI.GetComponent<BattleUI>();
@@ -60,18 +67,17 @@ public class BattleSystem : MonoBehaviour
         GameObject enemyGO = Instantiate(enemy, enemyBattleStation);
         enemyUnit = enemyGO.GetComponent<ES>();
 
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(0.5f);
 
 
-            state = BattleState.PLAYERTURN;
-            PlayerTurn();
+        state = BattleState.PLAYERTURN;
+        PlayerTurn();
 
         
     }
     void Update()
     {
         CCUI();
-        CDUI();
         ActionPoint();
         Health();
     }
@@ -84,16 +90,17 @@ public class BattleSystem : MonoBehaviour
         BU.SetEnemyHit(true);
         BU.SetBlood(true);
         DamageUI(playerUnit.damage);
-        actionPoints += AP;
+
+        actionPoints += pistolAPCost;
         Debug.Log("플레이어가 공격함");
-        yield return new WaitForSeconds(3f);
+        yield return new WaitForSeconds(0.5f);
         BU.SetAttack(false);
         BU.SetBlood(false);
         BU.SetEnemyHit(false);
         // 턴 종료 UI를 활성화하고 1초 뒤에 비활성화
 
         BC.SetActive(true);
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(1f);
         BC.SetActive(false);
 
         // 적 HP 감소 UI
@@ -117,7 +124,8 @@ public class BattleSystem : MonoBehaviour
     IEnumerator PlayerHeal()
     {
         playerUnit.Heal();
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(0.5f);
+        actionPoints += AxeAPCost;
 
         state = BattleState.ENEMYTURN;
         StartCoroutine(EnemyTurn());
@@ -132,12 +140,12 @@ public class BattleSystem : MonoBehaviour
         BU.SetEnemy(true);
         BU.SetPBlood(true);
         // 유저 체력 UI 표시
-        yield return new WaitForSeconds(3f);
+        yield return new WaitForSeconds(0.5f);
         BU.SetEnemy(false);
         BU.SetPBlood(false);
         // 턴 종료 UI를 활성화하고 1초 뒤에 비활성화
         BC.SetActive(true);
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(0.5f);
         BC.SetActive(false);
 
         yield return new WaitForSeconds(1f);
@@ -215,9 +223,16 @@ public class BattleSystem : MonoBehaviour
         if(state == BattleState.WON)
         {
             Debug.Log("전투 승리");
+            GameManager gameManager = FindObjectOfType<GameManager>();
+            gameManager.SavePlayerData();
+
+            FightManager fightManager = FindObjectOfType<FightManager>();
+            SceneManager.LoadScene(scene);
+            fightManager.onBattle = 1;
         }
         else if(state == BattleState.LOST)
         {
+            SceneManager.LoadScene("Dead");
             Debug.Log("전투 패배");
         }
     }
@@ -232,7 +247,11 @@ public class BattleSystem : MonoBehaviour
         if (state != BattleState.PLAYERTURN)
             return;
 
-        StartCoroutine(PlayerAttack());
+        if (state == BattleState.PLAYERTURN) {
+
+            StartCoroutine(PlayerAttack());
+        }
+            
     }
 
     public void OnHealButton()
@@ -240,7 +259,10 @@ public class BattleSystem : MonoBehaviour
         if (state != BattleState.PLAYERTURN)
             return;
 
-        StartCoroutine(PlayerHeal());
+        if (state == BattleState.PLAYERTURN)
+        {
+            StartCoroutine(PlayerHeal());
+        }
     }
 
     public void OnPistolButton()
@@ -248,15 +270,18 @@ public class BattleSystem : MonoBehaviour
         if (state != BattleState.PLAYERTURN)
             return;
 
-        if (actionPoints >= pistolAPCost)
+        if (state == BattleState.PLAYERTURN)
         {
-            StartCoroutine(Pistol());
-        }
-        else
-        {
-            BU.SetWaring(true);
-            //yield return new WaitForSeconds(1f);
-            BU.SetWaring(false);
+            if (actionPoints >= pistolAPCost)
+            {
+                StartCoroutine(Pistol());
+            }
+            else
+            {
+                BU.SetWaring(true);
+                //yield return new WaitForSeconds(1f);
+                BU.SetWaring(false);
+            }
         }
     }
 
@@ -264,16 +289,18 @@ public class BattleSystem : MonoBehaviour
     {
         if (state != BattleState.PLAYERTURN)
             return;
-
-        if (actionPoints >= rifleAPCost)
+        if (state == BattleState.PLAYERTURN)
         {
-            StartCoroutine(Rifle());
-        }
-        else
-        {
-            BU.SetWaring(true);
-           // yield return new WaitForSeconds(1f);
-            BU.SetWaring(false);
+            if (actionPoints >= rifleAPCost)
+            {
+                StartCoroutine(Rifle());
+            }
+            else
+            {
+                BU.SetWaring(true);
+                //yield return new WaitForSeconds(1f);
+                BU.SetWaring(false);
+            }
         }
     }
 
@@ -281,16 +308,18 @@ public class BattleSystem : MonoBehaviour
     {
         if (state != BattleState.PLAYERTURN)
             return;
-
-        if (actionPoints >= DaggerAPCost)
+        if (state == BattleState.PLAYERTURN)
         {
-            StartCoroutine(Dagger());
-        }
-        else
-        {
-            BU.SetWaring(true);
-           // yield return new WaitForSeconds(1f);
-            BU.SetWaring(false);
+            if (actionPoints >= DaggerAPCost)
+            {
+                StartCoroutine(Dagger());
+            }
+            else
+            {
+                BU.SetWaring(true);
+                // yield return new WaitForSeconds(1f);
+                BU.SetWaring(false);
+            }
         }
     }
 
@@ -299,15 +328,18 @@ public class BattleSystem : MonoBehaviour
         if (state != BattleState.PLAYERTURN)
             return;
 
-        if (actionPoints >= AxeAPCost)
+        if (state == BattleState.PLAYERTURN)
         {
-            StartCoroutine(Axe());
-        }
-        else
-        {
-            BU.SetWaring(true);
-            //yield return new WaitForSeconds(1f);
-            BU.SetWaring(false);
+            if (actionPoints >= AxeAPCost)
+            {
+                StartCoroutine(Axe());
+            }
+            else
+            {
+                BU.SetWaring(true);
+                //yield return new WaitForSeconds(1f);
+                BU.SetWaring(false);
+            }
         }
     }
 
@@ -316,15 +348,18 @@ public class BattleSystem : MonoBehaviour
         if (state != BattleState.PLAYERTURN)
             return;
 
-        if (actionPoints >= ShotgunAPCost)
+        if (state == BattleState.PLAYERTURN)
         {
-            StartCoroutine(Shotgun());
-        }
-        else
-        {
-            BU.SetWaring(true);
-           // yield return new WaitForSeconds(1f);
-            BU.SetWaring(false);
+            if (actionPoints >= ShotgunAPCost)
+            {
+                StartCoroutine(Shotgun());
+            }
+            else
+            {
+                BU.SetWaring(true);
+                // yield return new WaitForSeconds(1f);
+                BU.SetWaring(false);
+            }
         }
     }
 
@@ -333,20 +368,25 @@ public class BattleSystem : MonoBehaviour
         if (state != BattleState.PLAYERTURN)
             return;
 
-        if (actionPoints >= SwordAPCost)
+        if (state == BattleState.PLAYERTURN)
         {
-            StartCoroutine(Sword());
-        }
-        else
-        {
-            BU.SetWaring(true);
-          //  yield return new WaitForSeconds(1f);
-            BU.SetWaring(false);
+            if (actionPoints >= SwordAPCost)
+            {
+                StartCoroutine(Sword());
+            }
+            else
+            {
+                BU.SetWaring(true);
+                //  yield return new WaitForSeconds(1f);
+                BU.SetWaring(false);
+            }
         }
     }
 
+
     IEnumerator Pistol()
     {
+        soundManager.PlayPistolSound();
         int pistolDamage = playerUnit.PistolDamage();
         bool isDead = enemyUnit.TakeDamage(pistolDamage);
         actionPoints -= pistolAPCost;
@@ -356,13 +396,13 @@ public class BattleSystem : MonoBehaviour
         BU.SetPistol(true);
         BU.SetBullet(true);
         BU.SetEnemyHit(true);
-        yield return new WaitForSeconds(3f);
+        yield return new WaitForSeconds(0.5f);
         // 턴 종료 UI를 활성화하고 1초 뒤에 비활성화
         BU.SetPistol(false);
         BU.SetBullet(false);
         BU.SetEnemyHit(false);
         BC.SetActive(true);
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(0.5f);
         BC.SetActive(false);
         // 적 HP 감소 UI
         yield return new WaitForSeconds(1f);
@@ -393,13 +433,13 @@ public class BattleSystem : MonoBehaviour
         BU.SetBullet(true);
         BU.SetEnemyHit(true);
         Debug.Log("플레이어가 소총으로 공격함");
-        yield return new WaitForSeconds(3f);
+        yield return new WaitForSeconds(0.5f);
         // 턴 종료 UI를 활성화하고 1초 뒤에 비활성화
         BU.SetRifle(false);
         BU.SetBullet(false);
         BU.SetEnemyHit(false);
         BC.SetActive(true);
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(0.5f);
         BC.SetActive(false);
 
         // 적 HP 감소 UI
@@ -432,12 +472,12 @@ public class BattleSystem : MonoBehaviour
         actionPoints -= SwordAPCost;
 
         Debug.Log("플레이어가 검으로 공격함");
-        yield return new WaitForSeconds(3f);
+        yield return new WaitForSeconds(0.5f);
         BU.SetSword(false);
         BU.SetBlood(false);
         BU.SetEnemyHit(false);
         BC.SetActive(true);
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(0.5f);
         BC.SetActive(false);
         yield return new WaitForSeconds(1f);
 
@@ -464,12 +504,12 @@ public class BattleSystem : MonoBehaviour
         BU.SetBlood(true);
         BU.SetEnemyHit(true);
         Debug.Log("플레이어가 단검으로 공격함");
-        yield return new WaitForSeconds(3f);
+        yield return new WaitForSeconds(0.5f);
         BU.SetDagger(false);
         BU.SetBlood(false);
         BU.SetEnemyHit(false);
         BC.SetActive(true);
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(0.5f);
         BC.SetActive(false);
         yield return new WaitForSeconds(1f);
 
@@ -497,12 +537,12 @@ public class BattleSystem : MonoBehaviour
         BU.SetEnemyHit(true);
         cam.TriggerShake(0.5f);
         Debug.Log("플레이어가 도끼로 공격함");
-        yield return new WaitForSeconds(3f);
+        yield return new WaitForSeconds(0.5f);
         BU.SetAxe(false);
         BU.SetBlood(false);
         BU.SetEnemyHit(false);
         BC.SetActive(true);
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(0.5f);
         BC.SetActive(false);
         yield return new WaitForSeconds(1f);
 
@@ -520,6 +560,7 @@ public class BattleSystem : MonoBehaviour
 
     IEnumerator Shotgun()
     {
+
         int shotgunDamage = playerUnit.ShotgunDamage();
         bool isDead = enemyUnit.TakeDamage(shotgunDamage);
         actionPoints -= ShotgunAPCost;
@@ -529,12 +570,12 @@ public class BattleSystem : MonoBehaviour
         BU.SetBullet(true);
         BU.SetEnemyHit(true);
         Debug.Log("플레이어가 샷건으로 공격함");
-        yield return new WaitForSeconds(3f);
+        yield return new WaitForSeconds(0.5f);
         BU.SetShotgun(false);
         BU.SetBullet(false);
         BU.SetEnemyHit(false);
         BC.SetActive(true);
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(0.5f);
         BC.SetActive(false);
         yield return new WaitForSeconds(1f);
 
@@ -565,7 +606,7 @@ public class BattleSystem : MonoBehaviour
 
     IEnumerator ResetAndHideUIText(TextMeshProUGUI textComponent)
     {
-        yield return new WaitForSeconds(2);
+        yield return new WaitForSeconds(1f);
         textComponent.text = "";
         textComponent.gameObject.SetActive(false);
 
@@ -576,12 +617,6 @@ public class BattleSystem : MonoBehaviour
     void CCUI()
     {
         UIText3.text = "HP:" + enemyUnit.health;
-    }
-
-    void CDUI()
-    {
-        UIText4.text = "치명타 데미지:" + (playerUnit.InitialCriticalDamage * 100).ToString() + "%";
-
     }
 
     void ActionPoint()
