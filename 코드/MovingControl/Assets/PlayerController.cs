@@ -11,8 +11,6 @@ public class PlayerController : MonoBehaviour
     Animator animator;
     string animationState = "AnimationState";
 
-    public FixedJoystick joystick;
-
     enum Stats
     {
         idle = 0,
@@ -47,8 +45,8 @@ public class PlayerController : MonoBehaviour
         // 바닥 추락 도중에는 방향 전환을 할 수 없기 때문입니다.
         if (SelectPlayer.isGrounded)
         {
-            float hAxis = joystick.input.x;
-            float vAxis = joystick.input.y;
+            float hAxis = Input.GetAxisRaw("Horizontal");
+            float vAxis = Input.GetAxisRaw("Vertical");
             // 키보드에 따른 X, Z 축 이동방향을 새로 결정합니다.
             MoveDir = new Vector3(-hAxis, 0, -vAxis);
             // 오브젝트가 바라보는 앞방향으로 이동방향을 돌려서 조정합니다.

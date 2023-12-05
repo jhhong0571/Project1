@@ -11,10 +11,6 @@ public class CamController : MonoBehaviour
 
     Animator animator;
 
-    public bool enableMobile = true;
-    public FixedJoystick joystick;
-    public FixedTouchField touchField;
-
     void Start()
     {
         animator = characterBody.GetComponent<Animator>();
@@ -28,10 +24,10 @@ public class CamController : MonoBehaviour
 
     private void LookAround()
     {
-        Vector2 Delta = new Vector2(touchField.TouchDist.x, touchField.TouchDist.y);
+        Vector2 mouseDelta = new Vector2(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"));
         Vector3 camAngle = cameraArm.rotation.eulerAngles;
 
-        float x = camAngle.x - Delta.y;
+        float x = camAngle.x - mouseDelta.y;
         if (x < 180f)
         {
             x = Mathf.Clamp(x, -1f, 70f);
@@ -41,12 +37,12 @@ public class CamController : MonoBehaviour
             x = Mathf.Clamp(x, 335f, 361f);
         }
 
-        cameraArm.rotation = Quaternion.Euler(x, camAngle.y + Delta.x, camAngle.z);
+        cameraArm.rotation = Quaternion.Euler(x, camAngle.y + mouseDelta.x, camAngle.z);
     }
 
     private void Move()
     {
-        Vector2 moveInput = new Vector2(joystick.input.x, joystick.input.y);
+        Vector2 moveInput = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
         bool isMove = moveInput.magnitude != 0;
         animator.SetBool("isMove", isMove);
         if (isMove)
